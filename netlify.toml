@@ -1,0 +1,5 @@
+[functions]
+    directory = "server/src/functions"
+
+[dev]
+    port = 12345

@@ -1,0 +1,21 @@
+{
+  "name": "vue3-waterfall",
+  "version": "1.0.0",
+  "description": "-",
+  "main": "index.js",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vhvy/vue3-waterfall.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vhvy/vue3-waterfall/issues"
+  },
+  "homepage": "https://github.com/vhvy/vue3-waterfall#readme",
+  "dependencies": {}
+}

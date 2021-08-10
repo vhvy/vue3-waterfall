@@ -1,0 +1,17 @@
+import { createParams } from "@/utils/params";
+
+export class Http {
+    constructor(baseURL = '') {
+        this.baseURL = baseURL;
+    }
+
+    get(url, params, { headers }) {
+        return fetch(this.baseURL + url + createParams(params), {
+            method: "GET",
+            mode: "cors",
+            headers
+        })
+    }
+}
+
+export default Http;
