@@ -5,10 +5,16 @@ export class Http {
         this.baseURL = baseURL;
     }
 
+    isCors(url) {
+        return url != "" && url != location.origin;
+    }
+
     get(url, params, { headers }) {
-        return fetch(this.baseURL + url + createParams(params), {
+        const mode = this.isCors(this.baseURL) ? "cors" : "same-origin";
+        const path = this.baseURL + url + createParams(params);
+        return fetch(path, {
             method: "GET",
-            mode: "cors",
+            mode,
             headers
         })
             .then(res => res.json());

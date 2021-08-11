@@ -1,4 +1,5 @@
 const axios = require("axios");
+const URL = require("url").URL;
 
 function request(method, url, config = {}) {
   return axios[method.toLowerCase()](url, config);
@@ -17,26 +18,40 @@ function handleHeader(header) {
 }
 // 将前端传上来的自定义请求头转换为正常请求头
 
+function isValidUrl(url) {
+  try {
+    new URL(url);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+// 是否是合法url
+
 
 const handler = async (event) => {
+
   const { httpMethod, queryStringParameters, headers } = event;
-  // console.log(httpMethod, headers);
 
-  const allowHeaders = headers["access-control-request-headers"];
-  // 获取要允许跨域的头
+  const responseHeaders = {};
 
-  const responseHeaders = {
-    "Access-Control-Allow-Origin": headers.origin,
-    "Access-Control-Allow-Headers": allowHeaders || "*",
+  if (headers.origin) {
+    const allowHeaders = headers["access-control-request-headers"];
+    // 获取要允许跨域的头
+
+    Object.assign(responseHeaders, {
+      "Access-Control-Allow-Origin": headers.origin,
+      "Access-Control-Allow-Headers": allowHeaders || "*",
+    });
   }
-  // 允许跨域
+  // 需要跨域时允许跨域
 
   if (httpMethod.toUpperCase() === "OPTIONS") {
     return {
       statusCode: 200,
       headers: responseHeaders
     }
-    // options 快速返回
+    // OPTIONS请求快速返回
   }
 
   Object.assign(responseHeaders, {
@@ -47,7 +62,7 @@ const handler = async (event) => {
   const url = queryStringParameters.url;
   // 获取提交上来需要代理访问的地址
 
-  if (!url) return {
+  if (!url || !isValidUrl(url)) return {
     statusCode: 404,
     body: JSON.stringify({
       message: "params error!"
