@@ -7,4 +7,6 @@
   status = 200
 
 [dev]
+    command = "npm run dev:vite"
+    targetPort = 3000
     port = 12345

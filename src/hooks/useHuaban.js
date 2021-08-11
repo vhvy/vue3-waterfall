@@ -3,7 +3,7 @@ import Http from "@/utils/http";
 import { ref, computed } from "vue";
 import { createParams } from "@/utils/params";
 
-const { huabanApi, proxyApi, headerPrefix, huabanFnPath } = config;
+const { huabanApi, proxyApi, headerPrefix, huabanFnPath, huabanImgUrl } = config;
 const request = new Http(proxyApi);
 const createHeaders = q => {
     const header = {
@@ -23,7 +23,28 @@ const createHeaders = q => {
         }, {});
 };
 
+const getPinUrl = (() => {
+    const urlMap = new Map();
+    return (bucket, key) => {
+        if (!urlMap.has(bucket)) {
+            urlMap.set(bucket, huabanImgUrl.replace(/{bucket}/, bucket));
+        }
+        const baseUrl = urlMap.get(bucket);
 
+        return baseUrl + "/" + key + '_' + '/format/webp';
+    };
+})();
+// 合成图片的正确路径
+
+const extractHuabanImg = pins => {
+    return pins.map(({ pin_id, file }) => ({
+        id: pin_id,
+        url: getPinUrl(file.bucket, file.key),
+        width: file.width,
+        height: file.height
+    }));
+};
+// 提取花瓣接口中图片的信息
 
 export default function useHuaban() {
     let images = ref([]);
@@ -59,13 +80,14 @@ export default function useHuaban() {
         const url = huabanFnPath + "?url=" + encodeURIComponent(huabanUrl);
         // 将要请求的地址 函数地址 + 要代理访问的地址参数
 
-        console.log(url);
-
         try {
             const res = await request.get(url, null, {
                 headers: headers.value
             });
             page++;
+            total = res.pin_count;
+            images.value.push(...extractHuabanImg(res.pins));
+            loaded = images.value.length >= total;
             console.log(res);
         } catch (error) {
             console.log(error);
