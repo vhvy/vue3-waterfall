@@ -11,6 +11,7 @@ export class Http {
             mode: "cors",
             headers
         })
+            .then(res => res.json());
     }
 }
 

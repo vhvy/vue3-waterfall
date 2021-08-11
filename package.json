@@ -17,5 +17,7 @@
     "url": "https://github.com/vhvy/vue3-waterfall/issues"
   },
   "homepage": "https://github.com/vhvy/vue3-waterfall#readme",
-  "dependencies": {}
+  "dependencies": {
+    "axios": "^0.21.1"
+  }
 }
