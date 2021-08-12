@@ -10,8 +10,6 @@ export default function useResize(delay = 150) {
     function handleResize() {
         screenHeight.value = window.innerHeight;
         screenWidth.value = window.innerWidth;
-
-        console.log(screenWidth);
     }
 
     const fn = throttle(handleResize, delay);

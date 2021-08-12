@@ -37,11 +37,12 @@ const getPinUrl = (() => {
 // 合成图片的正确路径
 
 const extractHuabanImg = pins => {
-    return pins.map(({ pin_id, file }) => ({
+    return pins.map(({ pin_id, file, raw_text }) => ({
         id: pin_id,
         url: getPinUrl(file.bucket, file.key),
         width: file.width,
-        height: file.height
+        height: file.height,
+        desc: raw_text
     }));
 };
 // 提取花瓣接口中图片的信息
@@ -50,7 +51,7 @@ export default function useHuaban() {
     let images = ref([]);
     let q = ref(encodeURIComponent("轻音少女"));
     let page = 1;
-    let limit = 20;
+    let limit = 40;
     let total = 0;
     let loaded = false;
     let loading = false;
@@ -88,10 +89,11 @@ export default function useHuaban() {
             total = res.pin_count;
             images.value.push(...extractHuabanImg(res.pins));
             loaded = images.value.length >= total;
-            console.log(res);
+            // console.log(res);
         } catch (error) {
             console.log(error);
         }
+        loading = false;
     }
 
     getImages();
