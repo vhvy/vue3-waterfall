@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "dev": "netlify dev",
+    "start": "npm run kill && npm run dev",
     "dev:vite": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "kill": "@powershell ./kill.ps1 3000 node.exe"
   },
   "repository": {
     "type": "git",
