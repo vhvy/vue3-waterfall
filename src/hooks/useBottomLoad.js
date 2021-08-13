@@ -8,15 +8,12 @@ import useScroll from "@/hooks/useScroll";
  * @param {Number} offset 距离底部多少距离时执行回调
  */
 export default function useBottomLoad(listenDom, calcDom, fn, offset) {
-    let lastScrollTop = 0;
 
-    useScroll(listenDom, () => {
+    useScroll(listenDom, calcDom, (e, isDown) => {
         const { scrollTop, scrollHeight } = calcDom;
         const { innerHeight } = window;
-        const isDown = scrollTop > lastScrollTop;
         if (isDown && scrollTop + innerHeight + offset > scrollHeight) {
             fn();
         }
-        lastScrollTop = scrollTop;
-    });
+    }, 80);
 }

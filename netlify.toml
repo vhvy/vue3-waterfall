@@ -1,11 +1,6 @@
 [functions]
     directory = "server/functions"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
 [dev]
     command = "npm run dev:vite"
     targetPort = 3000

@@ -1,6 +1,6 @@
 import config from "@/config";
 import Http from "@/utils/http";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { createParams } from "@/utils/params";
 
 const { huabanApi, proxyApi, headerPrefix, huabanFnPath, huabanImgUrl } = config;
@@ -47,31 +47,40 @@ const extractHuabanImg = pins => {
 };
 // 提取花瓣接口中图片的信息
 
-export default function useHuaban() {
+/**
+ * 
+ * @param {String} query 查询关键词
+ * @returns Object
+ */
+export default function useHuaban(query) {
     let images = ref([]);
-    let q = ref(encodeURIComponent("轻音少女"));
+    let currentImages = ref([]);
     let page = 1;
     let limit = 40;
     let total = 0;
     let loaded = false;
     let loading = false;
 
-    const setQ = query => {
-        q.value = encodeURIComponent(query);
-        page = 1;
-    }
-
     const headers = computed(() => {
-        return createHeaders(q.value);
+        return createHeaders(query.value);
     });
     // 根据查询关键字生成花瓣的请求头
+
+    watch(query, () => {
+        page = 1;
+        total = 0;
+        loaded = false;
+        images.value = [];
+        getImages();
+    });
+    // 查询关键字变化时恢复初始查询信息
 
     const getImages = async () => {
         if (loaded || loading) return;
         loading = true;
 
         const huabanUrl = huabanApi + createParams({
-            q: q.value,
+            q: query.value,
             page,
             per_page: limit,
             wfl: 1
@@ -81,28 +90,31 @@ export default function useHuaban() {
         const url = huabanFnPath + "?url=" + encodeURIComponent(huabanUrl);
         // 将要请求的地址 函数地址 + 要代理访问的地址参数
 
+        let q = query.value;
         try {
             const res = await request.get(url, null, {
                 headers: headers.value
             });
+            if (q != query.value) return;
             page++;
             total = res.pin_count;
-            images.value.push(...extractHuabanImg(res.pins));
+            const newImages = extractHuabanImg(res.pins);
+            currentImages.value = newImages;
+            images.value.push(...newImages);
             loaded = images.value.length >= total;
-            // console.log(res);
+            loading = false;
         } catch (error) {
             console.log(error);
+            if (q != query.value) return;
+            loading = false;
         }
-        loading = false;
     }
 
     getImages();
 
     return {
-        q,
-        setQ,
-
         images,
+        currentImages,
         getImages
     }
 }

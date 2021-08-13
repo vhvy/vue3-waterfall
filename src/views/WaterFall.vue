@@ -1,6 +1,12 @@
 <template>
   <div class="waterfall-wrap">
-    <Image v-for="item of imagesInfo" :id="item.id" :key="item.id" :style="item.styles" :src="item.url" />
+    <Image
+      v-for="item of imagesInfo"
+      :id="item.id"
+      :key="item.id"
+      :style="item.styles"
+      :src="item.url"
+    />
   </div>
 </template>
 
@@ -8,7 +14,7 @@
 import useHuaban from "@/hooks/useHuaban";
 import useImagePos from "@/hooks/useImagePos";
 import useBottomLoad from "@/hooks/useBottomLoad";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import Image from "@/components/Image.vue";
 
 export default {
@@ -36,13 +42,21 @@ export default {
       // 上下相邻的图片容器之间的间距
     });
 
-    const { q, setQ, images, getImages } = useHuaban();
-    const { imagesInfo, wrapHeight } = useImagePos(images, spacingInfo);
+    const query = ref("轻音少女");
+
+    const encodeQuery = computed(() => encodeURIComponent(query.value));
+    // 进行URL编码后的查询关键词
+
+    const { images, getImages, currentImages } = useHuaban(encodeQuery);
+    // 图片列表，以及加载下一页图片函数
+
+    const { imagesInfo, wrapHeight } = useImagePos(currentImages,spacingInfo);
+    // 计算图片在页面中的坐标
 
     useBottomLoad(window, document.documentElement, getImages, 400);
+    // 监听滚动到页面底部时加载下一页
 
     return {
-      images,
       imagesInfo,
       wrapHeight,
       ...spacingInfo.value
