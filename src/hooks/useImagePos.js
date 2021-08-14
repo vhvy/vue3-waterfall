@@ -29,6 +29,39 @@ const getMinNumIdx = (list) => {
 // 获取数组中最大值的下标
 
 
+const getMinValidIdx = (list, n) => {
+    let arr = list;
+
+    while (true) {
+        if (arr.length <= 2) return arr[0]._idx;
+        let idx = parseInt(arr.length / 2);
+        if (arr[idx + 1].styles['--top'] <= n) {
+            arr = arr.slice(idx);
+        } else if (arr[idx].styles['--top'] > n) {
+            arr = arr.slice(0, idx + 1);
+        } else {
+            return arr[idx]._idx;
+        }
+    }
+}
+// 获取符合条件的前两屏幕图片下标
+
+const getMaxValidIdx = (list, n) => {
+    let arr = list;
+
+    while (true) {
+        if (arr.length <= 2) return arr[arr.length - 1]._idx;
+        let idx = parseInt(arr.length / 2);
+        if (arr[idx + 1].styles['--top'] <= n) {
+            arr = arr.slice(idx);
+        } else if (arr[idx].styles['--top'] > n) {
+            arr = arr.slice(0, idx + 1);
+        } else {
+            return arr[idx + 1]._idx;
+        }
+    }
+}
+
 
 const createColumnHeightList = (num) => new Array(num).fill(0);
 // 生成一个指定个数元素的数组，默认值为0，用来保存column高度
@@ -74,15 +107,23 @@ export default (currentImages, spacingInfo) => {
     const { screenWidth, screenHeight } = useResize();
     // 屏幕实时宽度
 
+    let isFirst = true;
+
     const allImages = ref([]);
     // 所有图片信息列表
+
+    const firstColumnImgs = ref([]);
+    // 首列column 图片列表
 
     const imagesInfo = ref([]);
     // 当前要显示在屏幕上的图片列表
 
+    const startIndex = ref(0);
+    const endIndex = ref(0);
+
     const { wrapperMargin, itemRightMargin, itemBottomMargin } = spacingInfo.value;
 
-
+    let currentIdx = 0;
 
     const column = computed(() => {
         for (let { minWidth, column } of config) {
@@ -113,7 +154,13 @@ export default (currentImages, spacingInfo) => {
 
         const result = calcImagePos(images, totalHeight);
         allImages.value.push(...result.imageInfo);
+        firstColumnImgs.value.push(...result.firstColumnImgs);
         columnHeight.value = result.totalHeight;
+
+        if (isFirst) {
+            isFirst = false;
+            calcShowImages();
+        }
     });
     // 监听新加载的图片
 
@@ -121,14 +168,20 @@ export default (currentImages, spacingInfo) => {
         let totalHeight = createColumnHeightList(column.value);
         // 重新计算所有图片高度，所有重置为0
 
+        currentIdx = 0;
+
         const result = calcImagePos(allImages.value, totalHeight);
 
         allImages.value = result.imageInfo;
+        firstColumnImgs.value = result.firstColumnImgs;
         columnHeight.value = result.totalHeight;
+        calcShowImages();
+        updateimagesInfo();
     });
-    // 监听新加载的图片
+    // 监听宽度变化，重新计算所有图片坐标
 
     const calcImagePos = (list, totalHeight) => {
+        let firstColumnImgs = [];
         const imageInfo = list.map((item) => {
             const index = getMinNumIdx(totalHeight);
             // 获取高度最低的column序号
@@ -151,11 +204,17 @@ export default (currentImages, spacingInfo) => {
             totalHeight[index] += columnHeight + itemBottomMargin;
             // 累计图片容器高度+上下容器间距
 
+            const _idx = currentIdx++;
 
-            return { ...item, styles };
+            const img = { ...item, styles, _idx }
+
+            _idx % column.value === 0 && firstColumnImgs.push(img);
+
+            return img;
         });
 
         return {
+            firstColumnImgs,
             imageInfo,
             totalHeight
         }
@@ -163,15 +222,28 @@ export default (currentImages, spacingInfo) => {
     // 根据传入的图片列表和column高度信息计算图片信息以及column高度
 
     const calcShowImages = (e, isDown) => {
-        console.log(e, isDown);
-        const { scrollTop } = document.documentElement;
+        // console.log(e, isDown);
+        const { scrollTop, scrollHeight } = document.documentElement;
         // 这里明天再弄，从allImages中计算出-2屏和+2屏的图片数据，用二分查找法
+        // console.log(scrollTop);
 
-        // imagesInfo.value = 
+        let minY = scrollTop - screenHeight.value * 2;
+        let maxY = scrollHeight + screenHeight.value * 2;
+
+        minY = minY < 0 ? 0 : minY;
+
+        startIndex.value = getMinValidIdx(firstColumnImgs.value, minY);
+        endIndex.value = getMaxValidIdx(firstColumnImgs.value, maxY);
     }
     // 根据屏幕滚动位置计算要显示的图片
 
-    useScroll(window, document.documentElement, calcShowImages, 80);
+    useScroll(window, document.documentElement, calcShowImages, 40);
+
+    function updateimagesInfo() {
+        imagesInfo.value = allImages.value.slice(startIndex.value, endIndex.value + column.value);
+    }
+
+    watch([startIndex, endIndex], updateimagesInfo);
 
     return {
         imagesInfo,
