@@ -32,6 +32,8 @@ const getMinNumIdx = (list) => {
 const getMinValidIdx = (list, n) => {
     let arr = list;
 
+    if (arr.length === 0) return 0;
+
     while (true) {
         if (arr.length <= 2) return arr[0]._idx;
         let idx = parseInt(arr.length / 2);
@@ -49,6 +51,8 @@ const getMinValidIdx = (list, n) => {
 
 const getMaxValidIdx = (list, n) => {
     let arr = list;
+
+    if (arr.length === 0) return 0;
 
     while (true) {
         if (arr.length <= 2) return arr[arr.length - 1]._idx;
@@ -96,9 +100,10 @@ const other = {
 /**
  * @param {Array<Object>} list 图片列表
  * @param {Object} spacingInfo 边距等信息
+ * @param {String} query 查询关键字
  * @returns Object
  */
-export default (currentImages, spacingInfo) => {
+export default (currentImages, spacingInfo, query) => {
 
     /**
      * 新加载图片     ->   计算图片位置(新加载) && push到所有图片信息 && 累加column高度
@@ -147,6 +152,9 @@ export default (currentImages, spacingInfo) => {
         // 单栏宽度 = (屏幕宽度 - 瀑布流容器外边距 - 图片容器间距) / 栏个数
     });
     // column宽度
+
+
+
 
     watch(currentImages, (images) => {
         let totalHeight = [...columnHeight.value];
@@ -246,6 +254,14 @@ export default (currentImages, spacingInfo) => {
     }
 
     watch([startIndex, endIndex], updateimagesInfo);
+
+    watch(query, () => {
+        currentIdx = 0;
+        allImages.value = [];
+        firstColumnImgs.value = [];
+        columnHeight.value = createColumnHeightList(column.value);;
+        calcShowImages();
+    });
 
     return {
         imagesInfo,

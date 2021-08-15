@@ -15,7 +15,7 @@
 import useHuaban from "@/hooks/useHuaban";
 import useImagePos from "@/hooks/useImagePos";
 import useBottomLoad from "@/hooks/useBottomLoad";
-import { computed, ref } from "vue";
+import { computed, ref, toRefs } from "vue";
 import Image from "@/components/Image.vue";
 import Loading from "@/components/Loading.vue";
 
@@ -25,7 +25,13 @@ export default {
     Image,
     Loading
   },
-  setup() {
+  props: {
+    query: String
+  },
+  setup(props) {
+    const { query } = toRefs(props);
+    // 搜索关键词
+
     const spacingInfo = ref({
       wrapperTop: 10,
       // 瀑布流容器距离顶部的距离
@@ -45,16 +51,14 @@ export default {
       itemBottomMargin: 15,
       // 上下相邻的图片容器之间的间距
     });
-
-    const query = ref("轻音少女");
-
+    
     const encodeQuery = computed(() => encodeURIComponent(query.value));
     // 进行URL编码后的查询关键词
 
     const { getImages, currentImages } = useHuaban(encodeQuery);
     // 图片列表，以及加载下一页图片函数
 
-    const { imagesInfo, wrapHeight } = useImagePos(currentImages, spacingInfo);
+    const { imagesInfo, wrapHeight } = useImagePos(currentImages, spacingInfo, query);
     // 计算图片在页面中的坐标
 
     useBottomLoad(window, document.documentElement, getImages, 400);
@@ -90,6 +94,4 @@ export default {
     transform: translateX(-50%);
   }
 }
-
-
 </style>
