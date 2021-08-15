@@ -84,6 +84,7 @@ $color: #42b983;
     background-color: transparent;
     flex: 1;
     font-size: 20px;
+    min-width: 0;
 }
 
 .btn {
