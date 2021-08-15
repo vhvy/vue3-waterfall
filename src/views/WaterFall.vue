@@ -7,6 +7,7 @@
       :style="item.styles"
       :src="item.url"
     />
+    <Loading class="loading-wrap" />
   </div>
 </template>
 
@@ -16,10 +17,13 @@ import useImagePos from "@/hooks/useImagePos";
 import useBottomLoad from "@/hooks/useBottomLoad";
 import { computed, ref } from "vue";
 import Image from "@/components/Image.vue";
+import Loading from "@/components/Loading.vue";
+
 
 export default {
   components: {
-    Image
+    Image,
+    Loading
   },
   setup() {
     const spacingInfo = ref({
@@ -47,10 +51,10 @@ export default {
     const encodeQuery = computed(() => encodeURIComponent(query.value));
     // 进行URL编码后的查询关键词
 
-    const { images, getImages, currentImages } = useHuaban(encodeQuery);
+    const { getImages, currentImages } = useHuaban(encodeQuery);
     // 图片列表，以及加载下一页图片函数
 
-    const { imagesInfo, wrapHeight } = useImagePos(currentImages,spacingInfo);
+    const { imagesInfo, wrapHeight } = useImagePos(currentImages, spacingInfo);
     // 计算图片在页面中的坐标
 
     useBottomLoad(window, document.documentElement, getImages, 400);
@@ -77,5 +81,15 @@ export default {
   }
   height: calc(v-bind(wrapHeight) * 1px);
   position: relative;
+  padding-bottom: 120px;
+
+  .loading-wrap {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
+
+
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div class="img-wrap" :class="{ loading: !loaded }" :style="bg_style">
+    <div class="img-wrap" :class="{ loading: !loaded }" :style="bg_style" v-preview>
         <img
             class="img-el"
             v-lazy:[id]="img_loaded"
@@ -11,10 +11,11 @@
 
 <script>
 import lazyload from "@/directive/lazyload";
+import preview from "@/directive/preview";
 import { randomColor } from "@/utils/random";
 
 export default {
-    mixins: [lazyload],
+    mixins: [lazyload, preview],
     props: {
         id: Number,
         src: String
@@ -64,7 +65,11 @@ export default {
 .img-el {
     width: 100%;
     opacity: 1;
-    transition: all linear 0.2s;
+    transition: all cubic-bezier(0.37, 0.73, 0.63, 0.34) 0.2s;
     transform: scale(1);
+
+    &:hover {
+        transform: scale(1.2);
+    }
 }
 </style>

@@ -1,12 +1,12 @@
 class Observer {
     constructor() {
         this.options = {
-            threshold: .25
+            threshold: .1
         };
         this.customer = new Map();
-        this.observer = new IntersectionObserver(this.#handle.bind(this), this.options);
+        this.observer = new IntersectionObserver(this._handle.bind(this), this.options);
     }
-    #handle(entries) {
+    _handle(entries) {
         entries.forEach(({ isIntersecting, target }) => {
             if (isIntersecting) {
                 this.observer.unobserve(target);

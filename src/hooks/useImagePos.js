@@ -45,6 +45,7 @@ const getMinValidIdx = (list, n) => {
     }
 }
 // 获取符合条件的前两屏幕图片下标
+// if (i < n && i + 1 >= n) return index
 
 const getMaxValidIdx = (list, n) => {
     let arr = list;
@@ -61,6 +62,7 @@ const getMaxValidIdx = (list, n) => {
         }
     }
 }
+// 获取符合条件的后两屏幕图片下标
 
 
 const createColumnHeightList = (num) => new Array(num).fill(0);
@@ -106,8 +108,6 @@ export default (currentImages, spacingInfo) => {
 
     const { screenWidth, screenHeight } = useResize();
     // 屏幕实时宽度
-
-    let isFirst = true;
 
     const allImages = ref([]);
     // 所有图片信息列表
@@ -157,10 +157,7 @@ export default (currentImages, spacingInfo) => {
         firstColumnImgs.value.push(...result.firstColumnImgs);
         columnHeight.value = result.totalHeight;
 
-        if (isFirst) {
-            isFirst = false;
-            calcShowImages();
-        }
+        calcShowImages();
     });
     // 监听新加载的图片
 
@@ -176,7 +173,9 @@ export default (currentImages, spacingInfo) => {
         firstColumnImgs.value = result.firstColumnImgs;
         columnHeight.value = result.totalHeight;
         calcShowImages();
+
         updateimagesInfo();
+        // 宽度变化时，显示的图片范围有可能不变化，所以手动刷新一下。
     });
     // 监听宽度变化，重新计算所有图片坐标
 
@@ -221,16 +220,19 @@ export default (currentImages, spacingInfo) => {
     }
     // 根据传入的图片列表和column高度信息计算图片信息以及column高度
 
-    const calcShowImages = (e, isDown) => {
-        // console.log(e, isDown);
+    const calcShowImages = () => {
         const { scrollTop, scrollHeight } = document.documentElement;
         // 这里明天再弄，从allImages中计算出-2屏和+2屏的图片数据，用二分查找法
-        // console.log(scrollTop);
 
         let minY = scrollTop - screenHeight.value * 2;
+        // 获取前两屏第一行第一张图片坐标
+
         let maxY = scrollHeight + screenHeight.value * 2;
+        // 获取后两屏最后一航第一张图片坐标
 
         minY = minY < 0 ? 0 : minY;
+
+
 
         startIndex.value = getMinValidIdx(firstColumnImgs.value, minY);
         endIndex.value = getMaxValidIdx(firstColumnImgs.value, maxY);

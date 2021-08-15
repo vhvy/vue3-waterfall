@@ -11,6 +11,7 @@ export default {
                         .then(() => {
                             el.src = src;
                             binding.value(binding.arg);
+                            IO.unobserver(el);
                         });
                 });
             },
